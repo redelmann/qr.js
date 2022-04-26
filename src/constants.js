@@ -418,3 +418,31 @@ export function next_position(dim, x, y) {
         }
     }
 }
+
+export function min_version(message_length, mode, enc) {
+    if (enc !== 2) {
+        throw new Error("Only encoding 2 is supported");
+    }
+    let min = 1;
+    let max = MAX_VERSION;
+    while (max > min) {
+        const mid = Math.floor((max + min) / 2);
+        const lengths = data_lengths(mid, mode);
+        let length = 0;
+        for (let i = 0; i < lengths.length; i++) {
+            length += lengths[i];
+        }
+        length -= 1;
+        length -= Math.floor(enc_length_bits(mid, enc) / 8);
+        if (message_length > length) {
+            min = mid + 1;
+        }
+        else {
+            max = mid;
+        }
+    }
+    console.log("message_length: ", message_length);
+    console.log("mode: ", mode);
+    console.log("min version: ", min);
+    return max;
+}

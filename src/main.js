@@ -1,5 +1,6 @@
 import * as QR from './qr.js';
 import { qr_patterns } from './patterns.js';
+import { min_version } from './constants.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const message_input = document.getElementById('qr-message');
@@ -99,8 +100,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function update_min_version() {
+        const current_version = parseInt(version_input.value);
+        const mode = [1, 0, 3, 2][parseInt(mode_input.value)];
+        const least_version = min_version(message_input.value.length, mode, 2);
+        const old_min_version = parseInt(version_input.min);
+        version_input.min = least_version;
+        if (current_version < least_version || old_min_version == current_version) {
+            version_input.value = least_version;
+            version_input.nextElementSibling.innerText = least_version;
+        }
+    }
+
     message_input.addEventListener('input', function() {
         cache_modules = null;
+        update_min_version();
         refresh_canvas();
     });
     version_input.addEventListener('input', function() {
@@ -112,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mode_input.addEventListener('input', function() {
         cache_modules = null;
         cache_patterns = null;
+        update_min_version();
         this.nextElementSibling.value = ["L", "M", "Q", "H"][parseInt(this.value)];
         refresh_canvas();
     });
