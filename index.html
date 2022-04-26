@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <script type="text/javascript" src="dist/qr.js"></script>
+        <link rel="stylesheet" href="main.css" />
+        <meta name="viewport" content="width=500, initial-scale=0.65, minimum-scale=0.65, maximum-scale=0.65" />
+    </head>
+    <body>
+        <h1>QR Code Generator</h1>
+        <div id="top-controls">
+            <div>
+                <span>Message:</span>
+                <input type="text" id="qr-message" />
+            </div>
+            <div>
+                <span>Version:</span>
+                <input type="range" min="1" max="40" value="1" id="qr-version" />
+                <output>1</output>
+            </div>
+            <div>
+                <span>Mode:</span>
+                <input type="range" min="0" max="3" value="0" id="qr-mode" />
+                <output>L</output>
+            </div>
+            <div>
+                <span>Mask:</span>
+                <input type="range" min="0" max="7" value="0" id="qr-mask" />
+                <output>0</output>
+            </div>
+        </div>
+        <div id="qr-container">
+            <canvas id="qr-canvas" width="300" height="300"></canvas>
+        </div>
+        <div id="bottom-controls">
+            <a id="qr-download" href="#" download>Download QR code</a>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,71 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16pt;
+    width: 500px;
+    margin: auto;
+}
+
+h1 {
+    font-size: 24pt;
+    text-align: center;
+}
+
+a {
+    color: blue;
+    text-decoration: underline;
+}
+
+#top-controls {
+    margin-top: 20px;
+    width: 480px;
+    background-color: #eee;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#top-controls div {
+    margin-top: 15px;
+}
+
+#top-controls div:first-child {
+    margin-top: 0;
+}
+
+#top-controls div span {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+    padding-right: 10px;
+}
+
+#top-controls div input[type="text"] {
+    font-size: 16pt;
+    font-family: Arial, Helvetica, sans-serif;
+    display: inline-block;
+    width: 350px;
+    margin: 0;
+}
+
+#top-controls div input[type="range"] {
+    display: inline-block;
+    width: 330px;
+    margin: 0;
+}
+
+#top-controls div output {
+    display: inline-block;
+    width: 20px;
+    text-align: center;
+}
+
+#qr-container {
+    height: 500px;
+    width: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#bottom-controls {
+    text-align: center;
+}
