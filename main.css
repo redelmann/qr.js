@@ -48,13 +48,13 @@ a {
 
 #top-controls div input[type="range"] {
     display: inline-block;
-    width: 330px;
+    width: 300px;
     margin: 0;
 }
 
 #top-controls div output {
     display: inline-block;
-    width: 20px;
+    width: 50px;
     text-align: center;
 }
 

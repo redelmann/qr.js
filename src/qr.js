@@ -1,4 +1,4 @@
-import { alignment_pattern_positions, get_mask } from './constants.js';
+import { alignment_pattern_positions, get_mask, next_position } from './constants.js';
 import { encode_format, encode_version, encode_message } from './encoder.js';
 
 export const BLACK = 1;
@@ -106,35 +106,6 @@ export function create_qr_template(version, mode, mask) {
     modules[8][dim - 8] = BLACK;
 
     return modules;
-}
-
-function next_position(dim, x, y) {
-    const isRight = (x < 6 ? x : x - 1) % 2 === 1;
-    if (isRight) {
-        return [x - 1, y];
-    }
-
-    const column = Math.floor((x < 6 ? x : x - 1) / 2);
-    const evenColumn = column % 2 === 0;
-    
-    if (evenColumn) {
-        // Going down
-        if (y === dim - 1) {
-            return [x - 1, y];
-        }
-        else {
-            return [x + 1, y + 1];
-        }
-    }
-    else {
-        // Going up
-        if (y === 0) {
-            return [x === 7 ? 5 : x - 1, y];
-        }
-        else {
-            return [x + 1, y - 1];
-        }
-    }
 }
 
 function place_message(modules, encoded_message, mask) {

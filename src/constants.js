@@ -389,3 +389,32 @@ export function enc_length_bits(version, enc) {
 
     return lengths[enc];
 }
+
+export function next_position(dim, x, y) {
+    const isRight = (x < 6 ? x : x - 1) % 2 === 1;
+    if (isRight) {
+        return [x - 1, y];
+    }
+
+    const column = Math.floor((x < 6 ? x : x - 1) / 2);
+    const evenColumn = column % 2 === 0;
+    
+    if (evenColumn) {
+        // Going down
+        if (y === dim - 1) {
+            return [x - 1, y];
+        }
+        else {
+            return [x + 1, y + 1];
+        }
+    }
+    else {
+        // Going up
+        if (y === 0) {
+            return [x === 7 ? 5 : x - 1, y];
+        }
+        else {
+            return [x + 1, y - 1];
+        }
+    }
+}
