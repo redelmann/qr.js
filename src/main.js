@@ -38,8 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function refresh_canvas() {
 
         const message = message_input.value;
-        const version = parseInt(version_input.value);
         const mode = [1, 0, 3, 2][parseInt(mode_input.value)];
+        let version = parseInt(version_input.value);
+        if (version === 0) {
+            version = min_version(message.length, mode, 2);
+        }
         const mask = parseInt(mask_input.value);
         const showColors = parseInt(color_input.value) > 0;
 
@@ -100,33 +103,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function update_min_version() {
-        const current_version = parseInt(version_input.value);
-        const mode = [1, 0, 3, 2][parseInt(mode_input.value)];
-        const least_version = min_version(message_input.value.length, mode, 2);
-        const old_min_version = parseInt(version_input.min);
-        version_input.min = least_version;
-        if (current_version < least_version || old_min_version == current_version) {
-            version_input.value = least_version;
-            version_input.nextElementSibling.innerText = least_version;
-        }
-    }
-
     message_input.addEventListener('input', function() {
         cache_modules = null;
-        update_min_version();
         refresh_canvas();
     });
     version_input.addEventListener('input', function() {
         cache_modules = null;
         cache_patterns = null;
-        this.nextElementSibling.value = this.value;
+        let label = this.value;
+        if (label === '0') {
+            label = 'Min';
+        }
+        this.nextElementSibling.value = label;
         refresh_canvas();
     });
     mode_input.addEventListener('input', function() {
         cache_modules = null;
         cache_patterns = null;
-        update_min_version();
         this.nextElementSibling.value = ["L", "M", "Q", "H"][parseInt(this.value)];
         refresh_canvas();
     });
