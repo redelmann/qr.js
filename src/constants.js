@@ -441,8 +441,5 @@ export function min_version(message_length, mode, enc) {
             max = mid;
         }
     }
-    console.log("message_length: ", message_length);
-    console.log("mode: ", mode);
-    console.log("min version: ", min);
     return max;
 }

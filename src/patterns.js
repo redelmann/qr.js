@@ -1,7 +1,7 @@
 import { data_lengths, error_correction_length, alignment_pattern_positions, next_position } from "./constants.js";
 
 export const FINDER = 1;
-export const QUIET = 2;
+export const SEPARATOR = 2;
 export const ALIGNMENT = 3;
 export const TIMING = 4;
 export const FORMAT = 5;
@@ -22,9 +22,9 @@ export function qr_patterns(version, mode) {
 
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
-            modules[i][j] = QUIET;
-            modules[i][dim - 1 - j] = QUIET;
-            modules[dim - 1 - i][j] = QUIET;
+            modules[i][j] = SEPARATOR;
+            modules[i][dim - 1 - j] = SEPARATOR;
+            modules[dim - 1 - i][j] = SEPARATOR;
         }
     }
 
@@ -111,5 +111,5 @@ export function qr_patterns(version, mode) {
         [x, y] = next_position(dim, x, y);
     }
 
-    return modules;
+    return [modules, data_positions, ecc_positions];
 }

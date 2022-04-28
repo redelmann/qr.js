@@ -4,7 +4,7 @@
         <meta charset="utf-8" />
         <script type="text/javascript" src="dist/qr.js"></script>
         <link rel="stylesheet" href="main.css" />
-        <meta name="viewport" content="width=500, initial-scale=0.65, minimum-scale=0.65, maximum-scale=0.65" />
+        <meta name="viewport" content="width=800, initial-scale=1, minimum-scale=1, maximum-scale=1" />
     </head>
     <body>
         <h1>QR Code Generator</h1>
@@ -28,17 +28,66 @@
                 <input type="range" min="0" max="7" value="0" id="qr-mask" />
                 <output>0</output>
             </div>
-            <div>
-                <span>Colors:</span>
-                <input type="range" min="0" max="1" value="0" id="qr-color" />
-                <output>No</output>
-            </div>
         </div>
         <div id="qr-container">
             <canvas id="qr-canvas" width="300" height="300"></canvas>
         </div>
         <div id="bottom-controls">
             <a id="qr-download" href="#" download>Download QR code</a>
+        </div>
+        <div id="info-controls">
+            <h2>Patterns</h2>
+            <div id="patterns-buttons">
+                <a href="#" id="qr-patterns-show">Show all</a>
+                <a href="#" id="qr-patterns-hide">Hide all</a>
+            </div>
+            <div id="patterns-controls">
+                <div>
+                    <input type="checkbox" id="qr-position-patterns" />
+                    <label for="qr-position-patterns">Position detection</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="qr-separator-patterns" />
+                    <label for="qr-separator-patterns">Separator</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="qr-format-patterns" />
+                    <label for="qr-format-patterns">Format</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="qr-version-patterns" />
+                    <label for="qr-version-patterns">Version</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="qr-timing-patterns" />
+                    <label for="qr-timing-patterns">Timing</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="qr-alignment-patterns" />
+                    <label for="qr-alignment-patterns">Alignment</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="qr-black-square-patterns" />
+                    <label for="qr-black-square-patterns">Black square</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="qr-extra-white-patterns" />
+                    <label for="qr-extra-white-patterns">White square</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="qr-data-patterns" />
+                    <label for="qr-data-patterns">Data</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="qr-error-patterns" />
+                    <label for="qr-error-patterns">Error correction</label>
+                </div>
+            </div>
+            <h2>Other</h2>
+            <div>
+                <input type="checkbox" id="qr-data-path" />
+                <label for="qr-data-path">Show data path</label>
+            </div>
         </div>
     </body>
 </html>
