@@ -51,6 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
         this.href = data;
     }
 
+    let previous_min = null;
+
     function refresh_canvas() {
 
         const message = message_input.value;
@@ -58,6 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let version = parseInt(version_input.value);
         if (version === 0) {
             version = min_version(message.length, mode, 2);
+            if (previous_min !== version) {
+                cache_patterns = null;
+                previous_min = version;
+            }
         }
         const mask = parseInt(mask_input.value);
         let showColors = data_path_input.checked;
