@@ -3,6 +3,7 @@ body {
     font-size: 16pt;
     width: 800px;
     margin: auto;
+    padding-bottom: 20px;
 }
 
 h1 {
@@ -78,6 +79,7 @@ a {
     margin: 5px;
     margin-top: 20px;
     font-size: 24pt;
+    display: inline-block;
 }
 
 #info-controls a {
@@ -92,7 +94,7 @@ a {
     margin-top: 5px;
 }
 
-#patterns-controls {
+#patterns-controls, #other-controls {
     margin-top: 5px;
     display: flex;
     flex-direction: row;
@@ -101,17 +103,17 @@ a {
     gap: 10px;
 }
 
-#patterns-controls div {
-    width: 200px;
+#patterns-controls div, #other-controls div {
+    width: 253px;
+}
+
+#patterns-controls div:last-child, #other-controls div:last-child {
+    margin-right: auto;
 }
 
 #info-controls label {
     user-select: none;
     cursor: pointer;
-}
-
-#info-controls h2:first-child {
-    display: inline-block;
 }
 
 #patterns-buttons {

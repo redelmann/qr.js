@@ -83,25 +83,29 @@ export function qr_patterns(version, mode) {
 
     let [x, y] = [dim - 1, dim - 1];
     for (let i = 0; i < data_length; i++) {
+        const octet_positions = [];
         for (let j = 0; j < 8; j++) {
             while (modules[x][y] !== 0) {
                 [x, y] = next_position(dim, x, y);
             }
             modules[x][y] = DATA;
-            data_positions.push([x, y]);
+            octet_positions.push([x, y]);
             [x, y] = next_position(dim, x, y);
         }
+        data_positions.push(octet_positions);
     }
 
     for (let i = 0; i < ec_length; i++) {
+        const octet_positions = [];
         for (let j = 0; j < 8; j++) {
             while (modules[x][y] !== 0) {
                 [x, y] = next_position(dim, x, y);
             }
             modules[x][y] = ERROR_CORRECTION;
-            ecc_positions.push([x, y]);
+            octet_positions.push([x, y]);
             [x, y] = next_position(dim, x, y);
         }
+        ecc_positions.push(octet_positions);
     }
 
     while (x >= 0) {

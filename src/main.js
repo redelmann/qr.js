@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hide_all_patterns_button = document.getElementById('qr-patterns-hide');
 
     const data_path_input = document.getElementById('qr-data-path');
+    const data_groups_input = document.getElementById('qr-data-groups');
 
     const colors = [
         'white',
@@ -39,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'gray',
         'red',
         'brown',
-        'white',
+        'pink',
     ]
 
     let cache_modules = null;
@@ -66,7 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         const mask = parseInt(mask_input.value);
-        let showColors = data_path_input.checked;
+        const showPath = data_path_input.checked;
+        const showGroup = data_groups_input.checked;
+        let showColors = false;
         const showPatterns = {};
         for (let i = 1; i < 11; i++) {
             showPatterns[i] = pattern_inputs[i].checked;
@@ -118,49 +121,96 @@ document.addEventListener('DOMContentLoaded', () => {
                 }                
             }
         }
-        if (showColors) {
+        if (showColors || showPath || showGroup) {
             const patterns = cache_patterns !== null ? cache_patterns : Patterns.qr_patterns(version, mode);
             cache_patterns = patterns;
-            const modules = patterns[0];
 
-            ctx.globalAlpha = 0.5;
-            for (let i = 0; i < dim; i++) {
-                for (let j = 0; j < dim; j++) {
-                    const kind = modules[i][j];
-                    if (showPatterns[kind]) {
-                        ctx.fillStyle = colors[kind];
-                        ctx.fillRect(40 + i * scale, 40 + j * scale, scale, scale);
+            if (showColors) {
+                const modules = patterns[0];
+                ctx.globalAlpha = 0.5;
+                for (let i = 0; i < dim; i++) {
+                    for (let j = 0; j < dim; j++) {
+                        const kind = modules[i][j];
+                        if (showPatterns[kind]) {
+                            ctx.fillStyle = colors[kind];
+                            ctx.fillRect(40 + i * scale, 40 + j * scale, scale, scale);
+                        }
                     }
                 }
+                ctx.globalAlpha = 1;
             }
-            ctx.globalAlpha = 1;
 
-            if (data_path_input.checked) {
-
+            if (showPath) {
                 let last_x = null;
                 let last_y = null;
-                for (const [x, y] of patterns[1]) {
-                    if (last_x !== null) {
+                for (const octet of patterns[1]) {
+                    for (const [x, y] of octet) {
+                        if (last_x !== null) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = 'red';
+                            ctx.lineWidth = 2;
+                            ctx.moveTo(40 + last_x * scale + scale / 2, 40 + last_y * scale + scale / 2);
+                            ctx.lineTo(40 + x * scale + scale / 2, 40 + y * scale + scale / 2);
+                            ctx.stroke();
+                        }
+                        last_x = x;
+                        last_y = y;
+                    }
+                }
+
+                for (const octet of patterns[2]) {
+                    for (const [x, y] of octet) {
                         ctx.beginPath();
                         ctx.strokeStyle = 'red';
                         ctx.lineWidth = 2;
                         ctx.moveTo(40 + last_x * scale + scale / 2, 40 + last_y * scale + scale / 2);
                         ctx.lineTo(40 + x * scale + scale / 2, 40 + y * scale + scale / 2);
                         ctx.stroke();
+                        last_x = x;
+                        last_y = y;
                     }
-                    last_x = x;
-                    last_y = y;
                 }
+            }
 
-                for (const [x, y] of patterns[2]) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = 'red';
-                    ctx.lineWidth = 2;
-                    ctx.moveTo(40 + last_x * scale + scale / 2, 40 + last_y * scale + scale / 2);
-                    ctx.lineTo(40 + x * scale + scale / 2, 40 + y * scale + scale / 2);
-                    ctx.stroke();
-                    last_x = x;
-                    last_y = y;
+            if (showGroup) {
+                const dx_start = [0, 0, 1, 0];
+                const dx_end = [1, 1, 1, 0];
+                const dy_start = [1, 0, 0, 0];
+                const dy_end = [1, 0, 1, 1];
+
+                for (let k = 1; k <= 2; k++) {
+                    for (const octet of patterns[k]) {
+                        for (let i = 0; i < octet.length; i++) {
+                            const [x1, y1] = octet[i];
+                            const sides = [true, true, true, true];
+                            for (let j = 0; j < octet.length; j++) {
+                                const [x2, y2] = octet[j];
+                                if (x1 === x2) {
+                                    if (y1 === y2 - 1) {
+                                        sides[0] = false;
+                                    } else if (y1 === y2 + 1) {
+                                        sides[1] = false;
+                                    }
+                                } else if (y1 === y2) {
+                                    if (x1 === x2 - 1) {
+                                        sides[2] = false;
+                                    } else if (x1 === x2 + 1) {
+                                        sides[3] = false;
+                                    }
+                                }
+                            }
+                            for (let i = 0; i < 4; i++) {
+                                if (sides[i]) {
+                                    ctx.beginPath();
+                                    ctx.strokeStyle = 'red';
+                                    ctx.lineWidth = 2;
+                                    ctx.moveTo(40 + (x1 + dx_start[i]) * scale, 40 + (y1 + dy_start[i]) * scale);
+                                    ctx.lineTo(40 + (x1 + dx_end[i]) * scale, 40 + (y1 + dy_end[i]) * scale);
+                                    ctx.stroke();
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -219,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     data_path_input.addEventListener('change', refresh_canvas);
+    data_groups_input.addEventListener('change', refresh_canvas);
 
     refresh_canvas();
 });
