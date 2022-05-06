@@ -2,11 +2,16 @@ import * as QR from './qr.js';
 import * as Patterns from './patterns.js';
 import { min_version, next_position } from './constants.js';
 
+const SQUARE = 0;
+const ROUND = 1;
+const ROUNDED_SQUARE = 2;
+
 document.addEventListener('DOMContentLoaded', () => {
     const message_input = document.getElementById('qr-message');
     const version_input = document.getElementById('qr-version');
     const mode_input = document.getElementById('qr-mode');
     const mask_input = document.getElementById('qr-mask');
+    const display_input = document.getElementById('qr-display');
     const canvas = document.getElementById('qr-canvas');
     const ctx = canvas.getContext('2d');
     const download_button = document.getElementById('qr-download');
@@ -71,6 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const showPath = data_path_input.checked;
         const showGroup = data_groups_input.checked;
         const showZigzag = zigzag_input.checked;
+        const displayMode = parseInt(display_input.value);
+
         let showColors = false;
         const showPatterns = {};
         for (let i = 1; i < 11; i++) {
@@ -116,11 +123,58 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'black';
 
-        for (let i = 0; i < dim; i++) {
-            for (let j = 0; j < dim; j++) {
-                if (qr[i][j] === QR.BLACK) {
-                    ctx.fillRect(40 + i * scale, 40 + j * scale, scale, scale);
-                }                
+        if (displayMode === SQUARE) {
+            for (let i = 0; i < dim; i++) {
+                for (let j = 0; j < dim; j++) {
+                    if (qr[i][j] === QR.BLACK) {
+                        ctx.fillRect(40 + i * scale, 40 + j * scale, scale, scale);
+                    }                
+                }
+            }
+        }
+        else {
+            for (let i = 0; i < dim; i++) {
+                for (let j = 0; j < dim; j++) {
+                    if (qr[i][j] === QR.BLACK) {
+                        ctx.beginPath();
+                        ctx.arc(i * scale + 40 + scale/2, j * scale + 40 + scale/2, scale / 2, 0, 2 * Math.PI);
+                        ctx.fill();
+                        if (displayMode === ROUNDED_SQUARE) {
+                            for (let k = 0; k < 2; k++) {
+                                for (let l = 0; l < 2; l++) {
+                                    const di = k * 2 - 1;
+                                    const dj = l * 2 - 1;
+                                    
+                                    let has_black_neighbor = i + di >= 0 && i + di < dim && qr[i + di][j] === QR.BLACK;
+                                    has_black_neighbor = has_black_neighbor || j + dj >= 0 && j + dj < dim && qr[i][j + dj] === QR.BLACK;
+                                    if (has_black_neighbor) {
+                                        ctx.fillRect(i * scale + 40 + k * scale / 2, j * scale + 40 + l * scale / 2, scale / 2, scale / 2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (displayMode === ROUNDED_SQUARE) {
+                        for (let k = 0; k < 2; k++) {
+                            for (let l = 0; l < 2; l++) {
+                                const di = k * 2 - 1;
+                                const dj = l * 2 - 1;
+                                
+                                let has_black_neighbor = i + di >= 0 && i + di < dim && qr[i + di][j] === QR.BLACK;
+                                has_black_neighbor = has_black_neighbor && j + dj >= 0 && j + dj < dim && qr[i][j + dj] === QR.BLACK;
+                                has_black_neighbor = has_black_neighbor && qr[i + di][j + dj] === QR.BLACK;
+                                if (has_black_neighbor) {
+                                    ctx.fillRect(i * scale + 40 + k * scale / 2, j * scale + 40 + l * scale / 2, scale / 2, scale / 2);
+                                }
+                            }
+                        }
+                        ctx.fillStyle = 'white';
+                        ctx.beginPath();
+                        ctx.arc(i * scale + 40 + scale/2, j * scale + 40 + scale/2, scale / 2, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.fillStyle = 'black';
+                    }
+                }
             }
         }
 
@@ -260,6 +314,9 @@ document.addEventListener('DOMContentLoaded', () => {
     mask_input.addEventListener('input', function() {
         cache_modules = null;
         this.nextElementSibling.value = this.value;
+        refresh_canvas();
+    });
+    display_input.addEventListener('input', function() {
         refresh_canvas();
     });
 
