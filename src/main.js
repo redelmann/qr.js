@@ -1,10 +1,7 @@
 import * as QR from './qr.js';
 import * as Patterns from './patterns.js';
-import { min_version, next_position } from './constants.js';
-
-const SQUARE = 0;
-const ROUND = 1;
-const ROUNDED_SQUARE = 2;
+import { min_version } from './constants.js';
+import { renderQR } from './render.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const message_input = document.getElementById('qr-message');
@@ -35,20 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const zigzag_input = document.getElementById('qr-zigzag');
     const data_groups_input = document.getElementById('qr-data-groups');
 
-    const colors = [
-        'white',
-        'blue',
-        'cyan',
-        'purple',
-        'teal',
-        'yellow',
-        'orange',
-        'gray',
-        'red',
-        'brown',
-        'pink',
-    ]
-
     let cache_modules = null;
     let cache_patterns = null;
 
@@ -73,28 +56,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         const mask = parseInt(mask_input.value);
-        const showPath = data_path_input.checked;
-        const showGroup = data_groups_input.checked;
-        const showZigzag = zigzag_input.checked;
-        const displayMode = parseInt(display_input.value);
 
-        let showColors = false;
-        const showPatterns = {};
-        for (let i = 1; i < 11; i++) {
-            showPatterns[i] = pattern_inputs[i].checked;
-            if (showPatterns[i]) {
-                showColors = true;
-            }
-        }
-        let qr;        
         try {
-            qr = cache_modules !== null ? cache_modules : QR.create_qr_code(version, mode, mask, message);
-            cache_modules = qr;
+            if (!cache_modules) {
+                cache_modules = QR.create_qr_code(version, mode, mask, message);
+            }
         } catch (e) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const size = 400;
+            const factor = window.devicePixelRatio ?? 1;
+            canvas.setAttribute("width", String(size * factor));
+            canvas.setAttribute("height", String(size * factor));
+            canvas.style.setProperty("width", size + "px");
+            canvas.style.setProperty("height", size + "px");
+            const baseTransform = new DOMMatrix(`scale(${factor})`);
+            ctx.setTransform(baseTransform);
+            
+            ctx.clearRect(0, 0, size, size);
             ctx.fillStyle = 'red';
             ctx.beginPath();
-            ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 4, 0, 2 * Math.PI);
+            ctx.arc(size / 2, size / 2, size / 4, 0, 2 * Math.PI);
             ctx.fill();
 
             // Draw error message
@@ -102,193 +82,37 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.font = '24px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            ctx.fillText(e.message, canvas.width / 2, canvas.height - 60);
+            ctx.fillText(e.message, size / 2, size - 60);
             // Draw error symbol
             ctx.beginPath();
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 20;
-            ctx.moveTo(canvas.width / 2 - 60, canvas.height / 2 - 60);
-            ctx.lineTo(canvas.width / 2 + 60, canvas.height / 2 + 60);
-            ctx.moveTo(canvas.width / 2 + 60, canvas.height / 2 - 60);
-            ctx.lineTo(canvas.width / 2 - 60, canvas.height / 2 + 60);
+            ctx.moveTo(size / 2 - 60, size / 2 - 60);
+            ctx.lineTo(size / 2 + 60, size / 2 + 60);
+            ctx.moveTo(size / 2 + 60, size / 2 - 60);
+            ctx.lineTo(size / 2 - 60, size / 2 + 60);
             ctx.stroke();
             return;
         }
-        const dim = qr.length;
-        const scale = Math.min(Math.floor(720 / dim), 15);
-
-        canvas.width = dim * scale + 80;
-        canvas.height = dim * scale + 80;
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'black';
-
-        if (displayMode === SQUARE) {
-            for (let i = 0; i < dim; i++) {
-                for (let j = 0; j < dim; j++) {
-                    if (qr[i][j] === QR.BLACK) {
-                        ctx.fillRect(40 + i * scale, 40 + j * scale, scale, scale);
-                    }                
-                }
-            }
-        }
-        else {
-            for (let i = 0; i < dim; i++) {
-                for (let j = 0; j < dim; j++) {
-                    if (qr[i][j] === QR.BLACK) {
-                        ctx.beginPath();
-                        ctx.arc(i * scale + 40 + scale/2, j * scale + 40 + scale/2, scale / 2, 0, 2 * Math.PI);
-                        ctx.fill();
-                        if (displayMode === ROUNDED_SQUARE) {
-                            for (let k = 0; k < 2; k++) {
-                                for (let l = 0; l < 2; l++) {
-                                    const di = k * 2 - 1;
-                                    const dj = l * 2 - 1;
-                                    
-                                    let has_black_neighbor = i + di >= 0 && i + di < dim && qr[i + di][j] === QR.BLACK;
-                                    has_black_neighbor = has_black_neighbor || j + dj >= 0 && j + dj < dim && qr[i][j + dj] === QR.BLACK;
-                                    if (has_black_neighbor) {
-                                        ctx.fillRect(i * scale + 40 + k * scale / 2, j * scale + 40 + l * scale / 2, scale / 2, scale / 2);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (displayMode === ROUNDED_SQUARE) {
-                        for (let k = 0; k < 2; k++) {
-                            for (let l = 0; l < 2; l++) {
-                                const di = k * 2 - 1;
-                                const dj = l * 2 - 1;
-                                
-                                let has_black_neighbor = i + di >= 0 && i + di < dim && qr[i + di][j] === QR.BLACK;
-                                has_black_neighbor = has_black_neighbor && j + dj >= 0 && j + dj < dim && qr[i][j + dj] === QR.BLACK;
-                                has_black_neighbor = has_black_neighbor && qr[i + di][j + dj] === QR.BLACK;
-                                if (has_black_neighbor) {
-                                    ctx.fillRect(i * scale + 40 + k * scale / 2, j * scale + 40 + l * scale / 2, scale / 2, scale / 2);
-                                }
-                            }
-                        }
-                        ctx.fillStyle = 'white';
-                        ctx.beginPath();
-                        ctx.arc(i * scale + 40 + scale/2, j * scale + 40 + scale/2, scale / 2, 0, 2 * Math.PI);
-                        ctx.fill();
-                        ctx.fillStyle = 'black';
-                    }
-                }
-            }
+        
+        const show_patterns = {};
+        for (let i = 1; i < 11; i++) {
+            show_patterns[i] = pattern_inputs[i].checked;
         }
 
-        if (showColors || showPath || showGroup) {
-            if (cache_patterns === null) {
-                cache_patterns = Patterns.qr_patterns(version, mode);
-            }
+        const options = {
+            show_path: data_path_input.checked,
+            show_group: data_groups_input.checked,
+            show_zigzag: zigzag_input.checked,
+            display_mode: parseInt(display_input.value),
+            show_patterns: show_patterns,
         }
 
-        if (showColors) {
-            const modules = cache_patterns[0];
-            ctx.globalAlpha = 0.5;
-            for (let i = 0; i < dim; i++) {
-                for (let j = 0; j < dim; j++) {
-                    const kind = modules[i][j];
-                    if (showPatterns[kind]) {
-                        ctx.fillStyle = colors[kind];
-                        ctx.fillRect(40 + i * scale, 40 + j * scale, scale, scale);
-                    }
-                }
-            }
-            ctx.globalAlpha = 1;
+        if (!cache_patterns) {
+            cache_patterns = Patterns.qr_patterns(version, mode);
         }
 
-        if (showZigzag) {
-            let last_x = dim - 1;
-            let last_y = dim - 1;
-            let [x, y] = next_position(dim, last_x, last_y);
-            while (x >= 0) {
-                ctx.beginPath();
-                ctx.strokeStyle = 'gray';
-                ctx.lineWidth = 2;
-                ctx.moveTo(40 + last_x * scale + scale / 2, 40 + last_y * scale + scale / 2);
-                ctx.lineTo(40 + x * scale + scale / 2, 40 + y * scale + scale / 2);
-                ctx.stroke();
-                last_x = x;
-                last_y = y;
-                [x, y] = next_position(dim, last_x, last_y);
-            }
-        }
-
-        if (showPath) {
-            let last_x = null;
-            let last_y = null;
-            for (const octet of cache_patterns[1]) {
-                for (const [x, y] of octet) {
-                    if (last_x !== null) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = 'red';
-                        ctx.lineWidth = 2;
-                        ctx.moveTo(40 + last_x * scale + scale / 2, 40 + last_y * scale + scale / 2);
-                        ctx.lineTo(40 + x * scale + scale / 2, 40 + y * scale + scale / 2);
-                        ctx.stroke();
-                    }
-                    last_x = x;
-                    last_y = y;
-                }
-            }
-
-            for (const octet of cache_patterns[2]) {
-                for (const [x, y] of octet) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = 'red';
-                    ctx.lineWidth = 2;
-                    ctx.moveTo(40 + last_x * scale + scale / 2, 40 + last_y * scale + scale / 2);
-                    ctx.lineTo(40 + x * scale + scale / 2, 40 + y * scale + scale / 2);
-                    ctx.stroke();
-                    last_x = x;
-                    last_y = y;
-                }
-            }
-        }
-
-        if (showGroup) {
-            const dx_start = [0, 0, 1, 0];
-            const dx_end = [1, 1, 1, 0];
-            const dy_start = [1, 0, 0, 0];
-            const dy_end = [1, 0, 1, 1];
-
-            for (let k = 1; k <= 2; k++) {
-                for (const octet of cache_patterns[k]) {
-                    for (let i = 0; i < octet.length; i++) {
-                        const [x1, y1] = octet[i];
-                        const sides = [true, true, true, true];
-                        for (let j = 0; j < octet.length; j++) {
-                            const [x2, y2] = octet[j];
-                            if (x1 === x2) {
-                                if (y1 === y2 - 1) {
-                                    sides[0] = false;
-                                } else if (y1 === y2 + 1) {
-                                    sides[1] = false;
-                                }
-                            } else if (y1 === y2) {
-                                if (x1 === x2 - 1) {
-                                    sides[2] = false;
-                                } else if (x1 === x2 + 1) {
-                                    sides[3] = false;
-                                }
-                            }
-                        }
-                        for (let i = 0; i < 4; i++) {
-                            if (sides[i]) {
-                                ctx.beginPath();
-                                ctx.strokeStyle = 'red';
-                                ctx.lineWidth = 2;
-                                ctx.moveTo(40 + (x1 + dx_start[i]) * scale, 40 + (y1 + dy_start[i]) * scale);
-                                ctx.lineTo(40 + (x1 + dx_end[i]) * scale, 40 + (y1 + dy_end[i]) * scale);
-                                ctx.stroke();
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        renderQR(canvas, cache_modules, cache_patterns, options);
     }
 
     message_input.addEventListener('input', function() {
