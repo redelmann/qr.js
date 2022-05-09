@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             if (!cache_modules) {
-                cache_modules = QR.create_qr_code(version, mode, mask, message);
+                cache_modules = QR.create_qr_code(version, mode, mask, message, false);
             }
         } catch (e) {
             const size = 400;

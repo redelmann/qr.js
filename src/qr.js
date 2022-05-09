@@ -130,9 +130,14 @@ function place_message(modules, encoded_message, mask) {
     }
 }
 
-export function create_qr_code(version, mode, mask, message) {
+export function create_qr_code(version, mode, mask, message, only_mask) {
     const modules = create_qr_template(version, mode, mask);
     const encoded_message = encode_message(message, version, mode, 2);
+    if (only_mask) {
+        for (let i = 0; i < encoded_message.length; i++) {
+            encoded_message[i] = 0;
+        }
+    }
     place_message(modules, encoded_message, mask);
     return modules;
 }
