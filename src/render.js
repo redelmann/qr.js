@@ -135,52 +135,44 @@ export function renderQR(canvas, qr, patterns, options) {
     }
 
     if (show_zigzag) {
-        let last_x = dim - 1;
-        let last_y = dim - 1;
-        let [x, y] = next_position(dim, last_x, last_y);
+        let x = dim - 1;
+        let y = dim - 1;
+        ctx.beginPath();
+        ctx.strokeStyle = 'gray';
+        ctx.lineWidth = 2;
+        ctx.moveTo(margin_size + x * scale + scale / 2, margin_size + y * scale + scale / 2);
+        [x, y] = next_position(dim, x, y);
         while (x >= 0) {
-            ctx.beginPath();
-            ctx.strokeStyle = 'gray';
-            ctx.lineWidth = 2;
-            ctx.moveTo(margin_size + last_x * scale + scale / 2, margin_size + last_y * scale + scale / 2);
             ctx.lineTo(margin_size + x * scale + scale / 2, margin_size + y * scale + scale / 2);
-            ctx.stroke();
-            last_x = x;
-            last_y = y;
-            [x, y] = next_position(dim, last_x, last_y);
+            [x, y] = next_position(dim, x, y);
         }
+        ctx.stroke();
     }
 
     if (show_path) {
-        let last_x = null;
-        let last_y = null;
+        ctx.beginPath();
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        let started = false;
+
         for (const octet of patterns[1]) {
             for (const [x, y] of octet) {
-                if (last_x !== null) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = 'red';
-                    ctx.lineWidth = 2;
-                    ctx.moveTo(margin_size + last_x * scale + scale / 2, margin_size + last_y * scale + scale / 2);
+                if (!started) {
+                    ctx.moveTo(margin_size + x * scale + scale / 2, margin_size + y * scale + scale / 2);
+                    started = true;
+                } else {
                     ctx.lineTo(margin_size + x * scale + scale / 2, margin_size + y * scale + scale / 2);
-                    ctx.stroke();
                 }
-                last_x = x;
-                last_y = y;
             }
         }
 
         for (const octet of patterns[2]) {
             for (const [x, y] of octet) {
-                ctx.beginPath();
-                ctx.strokeStyle = 'red';
-                ctx.lineWidth = 2;
-                ctx.moveTo(margin_size + last_x * scale + scale / 2, margin_size + last_y * scale + scale / 2);
                 ctx.lineTo(margin_size + x * scale + scale / 2, margin_size + y * scale + scale / 2);
-                ctx.stroke();
-                last_x = x;
-                last_y = y;
             }
         }
+
+        ctx.stroke();
     }
 
     if (show_group) {
